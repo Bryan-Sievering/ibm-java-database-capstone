@@ -1,3 +1,421 @@
+/* this is the style sheet for the adminDashboard. */
+
+/* =========================
+   Global Reset and Base
+   ========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background-color: #f7fafb;
+  color: #183247;
+  line-height: 1.5;
+}
+
+/* Container helpers */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-inline: 16px;
+}
+
+/* =========================
+   Layout Wrappers
+   ========================= */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h2 {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 50px;
+  color: #003e3e;
+}
+
+/* Main content with background image */
+.main-content {
+  flex-grow: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  background-image: url("index.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  gap: 20px;
+  border-radius: 16px;
+}
+
+/* =========================
+   Controls: Search + Filters
+   ========================= */
+.controls {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #e6eff4;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.search {
+  flex: 1 1 260px;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#searchBar,
+.search input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #183247;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#searchBar::placeholder {
+  color: #8ca2b3;
+}
+
+#searchBar:focus {
+  border-color: #A62B1F;
+  box-shadow: 0 0 0 3px rgba(166, 43, 31, 0.15);
+  outline: none;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.filter label {
+  font-size: 12px;
+  color: #718096;
+}
+
+.filter select {
+  appearance: none;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #183247;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #A62B1F 50%),
+    linear-gradient(135deg, #A62B1F 50%, transparent 50%),
+    linear-gradient(to right, #cfd8dc, #cfd8dc);
+  background-position:
+    calc(100% - 20px) calc(0.8em),
+    calc(100% - 14px) calc(0.8em),
+    calc(100% - 2.4em) 0.5em;
+  background-size: 6px 6px, 6px 6px, 1px 1.6em;
+  background-repeat: no-repeat;
+}
+
+.filter select:focus {
+  border-color: #A62B1F;
+  box-shadow: 0 0 0 3px rgba(166, 43, 31, 0.15);
+  outline: none;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+/* Primary button style for main actions */
+button,
+.button,
+.btn {
+  background-color: #A62B1F; /* bold red */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  width: 200px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.05s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+button:hover,
+.button:hover,
+.btn:hover {
+  background-color: #A62B1F; /* keep branding same on hover */
+}
+
+/* Admin-specific smaller/secondary button */
+.adminBtn {
+  background-color: #f4f4f4;
+  color: #333333;
+  font-weight: bold;
+  width: 110px;
+  padding: 10px 0;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.05s ease, box-shadow 0.2s ease;
+}
+
+.adminBtn:hover {
+  color: #A62B1F; /* brand accent on hover */
+}
+
+/* =========================
+   Content Area & Doctor Cards
+   ========================= */
+.content {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.doctor-card {
+  flex: 1 1 260px; /* responsive columns */
+  max-width: 360px;
+  background: #ffffff;
+  border: 1px solid #e6eff4;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.doctor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 6px 12px rgba(0,0,0,0.05);
+}
+
+.doctor-card .header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doctor-card .avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #eef4f6;
+  border: 1px solid #e6eff4;
+}
+
+.doctor-card .name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #183247;
+}
+
+.doctor-card .meta {
+  font-size: 13px;
+  color: #718096;
+}
+
+.doctor-card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.doctor-card .tag {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ffeceb;
+  color: #A62B1F;
+  border: 1px solid #ffd7d4;
+}
+
+.doctor-card .actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+/* =========================
+   Modal Styling
+   ========================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;            /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(16, 42, 67, 0.45);
+  z-index: 1000;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.modal[aria-hidden="false"],
+.modal.open {
+  display: flex;
+  opacity: 1;
+}
+
+#modal-body {
+  position: relative;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 22px;
+  width: min(640px, 94vw);
+  max-height: 86vh;
+  overflow: auto;
+  border: 1px solid #e6eff4;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 6px 12px rgba(0,0,0,0.05);
+  transform: translateY(6px);
+  transition: transform 0.2s ease;
+}
+
+.modal[aria-hidden="false"] #modal-body,
+.modal.open #modal-body {
+  transform: translateY(0);
+}
+
+.close,
+#closeModal {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #183247;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.close:hover,
+.close:focus-visible,
+#closeModal:hover,
+#closeModal:focus-visible {
+  background-color: #fff3f1;
+  color: #A62B1F;
+  outline: none;
+}
+
+/* Inputs inside modal form */
+.modal form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal form .form-row.single {
+  grid-template-columns: 1fr;
+}
+
+.modal input[type="text"],
+.modal input[type="email"],
+.modal input[type="tel"],
+.modal input[type="number"],
+.modal input[type="time"],
+.modal input[type="date"],
+.modal select,
+.modal textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #183247;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  border-color: #A62B1F;
+  box-shadow: 0 0 0 3px rgba(166, 43, 31, 0.15);
+  outline: none;
+}
+
+.modal .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 768px) {
+  .controls {
+    gap: 10px;
+  }
+
+  .modal form .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .main-content {
+    padding: 24px;
+    border-radius: 12px;
+  }
+
+  .content {
+    justify-content: stretch;
+  }
+
+  button,
+  .button,
+  .btn {
+    width: 100%;
+  }
+}
+
 /*this is the style sheet for the adminDashboard. */
 
 /* 

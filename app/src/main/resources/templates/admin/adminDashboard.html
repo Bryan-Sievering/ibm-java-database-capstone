@@ -1,3 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Dashboard</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/images/logo/logo.png}" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/adminDashboard.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
+
+    <!-- Utilities and component renderers -->
+    <script th:src="@{/js/render.js}" defer></script>
+    <script th:src="@{/js/util.js}" defer></script>
+    <script th:src="@{/js/components/header.js}" defer></script>
+    <script th:src="@{/js/components/footer.js}" defer></script>
+</head>
+<body>
+<div class="container">
+    <div class="wrapper">
+        <!-- Header placeholder (header.js should render an "Add Doctor" button) -->
+        <div id="header"></div>
+
+        <main class="main-content" id="adminDashboard" data-require-role="admin">
+            <section class="controls">
+                <div class="search">
+                    <label for="searchBar" class="visually-hidden">Search by doctor name</label>
+                    <input type="text" id="searchBar" placeholder="search by doctor name" />
+                </div>
+
+                <div class="filters">
+                    <div class="filter">
+                        <label for="timeFilter">Sort by time</label>
+                        <select id="timeFilter">
+                            <option value="all">All</option>
+                            <option value="am">AM</option>
+                            <option value="pm">PM</option>
+                        </select>
+                    </div>
+
+                    <div class="filter">
+                        <label for="specialtyFilter">Filter by specialty</label>
+                        <select id="specialtyFilter">
+                            <option value="all">All specialties</option>
+                            <option value="cardiologist">Cardiologist</option>
+                            <option value="dentist">Dentist</option>
+                            <option value="dermatologist">Dermatologist</option>
+                            <option value="general">General Practitioner</option>
+                            <option value="neurologist">Neurologist</option>
+                            <option value="pediatrician">Pediatrician</option>
+                            <option value="psychiatrist">Psychiatrist</option>
+                            <option value="radiologist">Radiologist</option>
+                            <option value="surgeon">Surgeon</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic doctor cards/content will be injected here -->
+            <section id="content" class="content"></section>
+        </main>
+
+        <!-- Footer placeholder -->
+        <div id="footer"></div>
+    </div>
+</div>
+
+<!-- Modal for adding a doctor (hidden by default) -->
+<div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <span id="closeModal" class="close" aria-label="Close">&times;</span>
+    <div id="modal-body"></div>
+</div>
+
+<!-- Page-specific modules -->
+<script type="module" th:src="@{/js/services/adminDashboard.js}" defer></script>
+<script type="module" th:src="@{/js/components/doctorCard.js}" defer></script>
+</body>
+</html>
+
 <!-- adminDashboard.html -->
 
 <!-- 

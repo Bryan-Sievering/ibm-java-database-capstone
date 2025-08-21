@@ -1,3 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Select Role | Smart Clinic</title>
+    <link rel="icon" type="image/png" href="./assets/images/logo/logo.png" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./assets/css/index.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+
+    <!-- Utilities and component renderers -->
+    <script src="./js/util.js" defer></script>
+    <script src="./js/render.js" defer></script>
+    <script src="./js/components/header.js" defer></script>
+    <script src="./js/components/footer.js" defer></script>
+
+    <!-- Optional: small global helper to store role and emit event -->
+    <script defer>
+        function selectRole(role) {
+          try {
+            localStorage.setItem('role', role);
+            document.dispatchEvent(new CustomEvent('role:selected', { detail: { role } }));
+          } catch (_) {}
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="wrapper">
+        <!-- Header placeholder -->
+        <div id="header"></div>
+
+        <!-- Main content -->
+        <main class="main-content">
+            <section class="role-selection">
+                <h2 id="roleHeading">Select Your Role</h2>
+                <div class="role-buttons">
+                    <button id="btnAdmin" class="btn role-btn" onclick="selectRole('admin')">Admin</button>
+                    <button id="btnDoctor" class="btn role-btn" onclick="selectRole('doctor')">Doctor</button>
+                    <button id="btnPatient" class="btn role-btn" onclick="selectRole('patient')">Patient</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer placeholder -->
+        <div id="footer"></div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+        <button id="closeModal" class="modal-close" aria-label="Close">&times;</button>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- Page-specific logic: role selection and modal behavior -->
+<script type="module" src="./js/services/index.js" defer></script>
+</body>
+</html>
+
 <!-- index.html -->
 <!-- 
 

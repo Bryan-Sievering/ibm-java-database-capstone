@@ -1,3 +1,138 @@
+// index.js (role-based login handling)
+
+import { openModal } from "../components/modals.js";
+import { API_BASE_URL } from "../config/config.js";
+
+// API endpoints
+const ADMIN_API = API_BASE_URL + "/admin";
+const DOCTOR_API = API_BASE_URL + "/doctor/login";
+
+// Ensure DOM is ready before wiring up events
+window.addEventListener("load", () => {
+  // Buttons that trigger login modals (if present on the page)
+  const adminBtn = document.getElementById("adminLogin");
+  if (adminBtn) {
+    adminBtn.addEventListener("click", () => openModal("adminLogin"));
+  }
+
+  const doctorBtn = document.getElementById("doctorLogin");
+  if (doctorBtn) {
+    doctorBtn.addEventListener("click", () => openModal("doctorLogin"));
+  }
+});
+
+/**
+ * Admin login handler
+ * Reads credentials, authenticates, and stores token/role.
+ * Exposed globally for modal submit buttons to call.
+ */
+window.adminLoginHandler = async function adminLoginHandler() {
+  try {
+    const usernameInput =
+      document.getElementById("adminUsername") || document.getElementById("username");
+    const passwordInput =
+      document.getElementById("adminPassword") || document.getElementById("password");
+
+    const username = usernameInput?.value?.trim() || "";
+    const password = passwordInput?.value || "";
+
+    if (!username || !password) {
+      alert("Please enter both username and password.");
+      return;
+    }
+
+    const admin = { username, password };
+    const res = await fetch(ADMIN_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(admin),
+    });
+
+    if (!res.ok) {
+      alert("Invalid credentials!");
+      return;
+    }
+
+    const data = await res.json().catch(() => ({}));
+    const token = data.token || data.accessToken || data.jwt;
+    if (!token) {
+      alert("Login succeeded but token was not returned.");
+      return;
+    }
+
+    localStorage.setItem("token", token);
+    // Keep both keys for compatibility with other parts of the app
+    localStorage.setItem("userRole", "admin");
+    if (typeof window.selectRole === "function") {
+      window.selectRole("admin");
+    }
+
+    // Optional: close modal if your modal system supports it
+    if (typeof window.closeModal === "function") {
+      window.closeModal();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred while trying to log in. Please try again.");
+  }
+};
+
+/**
+ * Doctor login handler
+ * Reads credentials, authenticates, and stores token/role.
+ * Exposed globally for modal submit buttons to call.
+ */
+window.doctorLoginHandler = async function doctorLoginHandler() {
+  try {
+    const emailInput =
+      document.getElementById("doctorEmail") || document.getElementById("email");
+    const passwordInput =
+      document.getElementById("doctorPassword") || document.getElementById("password");
+
+    const email = emailInput?.value?.trim() || "";
+    const password = passwordInput?.value || "";
+
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      return;
+    }
+
+    const doctor = { email, password };
+    const res = await fetch(DOCTOR_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(doctor),
+    });
+
+    if (!res.ok) {
+      alert("Invalid credentials!");
+      return;
+    }
+
+    const data = await res.json().catch(() => ({}));
+    const token = data.token || data.accessToken || data.jwt;
+    if (!token) {
+      alert("Login succeeded but token was not returned.");
+      return;
+    }
+
+    localStorage.setItem("token", token);
+    // Keep both keys for compatibility with other parts of the app
+    localStorage.setItem("userRole", "doctor");
+    if (typeof window.selectRole === "function") {
+      window.selectRole("doctor");
+    }
+
+    // Optional: close modal if your modal system supports it
+    if (typeof window.closeModal === "function") {
+      window.closeModal();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred while trying to log in. Please try again.");
+  }
+};
+
 /*
   Import the openModal function to handle showing login popups/modals
   Import the base API URL from the config file

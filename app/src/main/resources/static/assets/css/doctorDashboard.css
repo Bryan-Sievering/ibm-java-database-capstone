@@ -1,4 +1,310 @@
 /* This is the style sheet for the doctorDashboard.html */
+
+/* =========================
+   Reset & Base
+   ========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  color: #183247;
+  background-color: #f7fafb;
+  line-height: 1.5;
+}
+
+/* Scope page-specific rules to the dashboard to avoid collisions */
+#doctorDashboard {
+  --primary: #015c5d;
+  --primary-hover: #017d7e;
+  --text: #183247;
+  --muted: #718096;
+  --surface: #ffffff;
+  --border: #e6eff4;
+  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================
+   Layout
+   ========================= */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#doctorDashboard.main-content {
+  flex-grow: 1;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Controls (search + filters) */
+#doctorDashboard .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-1);
+}
+
+#doctorDashboard .search {
+  flex: 1 1 260px;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#doctorDashboard .filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#doctorDashboard .filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+#doctorDashboard .filter label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* =========================
+   Search and Filter Styling
+   ========================= */
+#doctorDashboard #searchBar,
+#doctorDashboard input[type="text"],
+#doctorDashboard input[type="date"],
+#doctorDashboard select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+#doctorDashboard #searchBar::placeholder,
+#doctorDashboard input::placeholder {
+  color: #8ca2b3;
+}
+
+#doctorDashboard #searchBar:focus,
+#doctorDashboard input:focus,
+#doctorDashboard select:focus {
+  border-color: var(--primary-hover);
+  box-shadow: 0 0 0 3px rgba(1, 125, 126, 0.18);
+  outline: none;
+}
+
+/* Today button (supports id or class) */
+#doctorDashboard #todayButton,
+#doctorDashboard .today-btn,
+#doctorDashboard .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background-color 0.2s ease, transform 0.05s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-1);
+}
+
+#doctorDashboard #todayButton:hover,
+#doctorDashboard .today-btn:hover,
+#doctorDashboard .btn:hover {
+  background-color: var(--primary-hover);
+}
+
+#doctorDashboard .today-btn {
+  margin-right: 10px;
+}
+
+/* Date picker (supports id or class) */
+#doctorDashboard #datePicker,
+#doctorDashboard .date-picker {
+  margin-left: 10px;
+  margin-top: 13px;
+  height: 38px; /* roughly 30px + borders/padding */
+}
+
+/* =========================
+   Table Styling
+   ========================= */
+#doctorDashboard .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#doctorDashboard table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+#doctorDashboard thead {
+  background-color: rgba(1, 92, 93, 0.9); /* dark semi-transparent */
+  color: #ffffff;
+}
+
+#doctorDashboard thead th {
+  position: sticky; /* helpful when scrolling long tables */
+  top: 0;
+}
+
+#doctorDashboard td,
+#doctorDashboard th {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e5eef3;
+  white-space: nowrap;
+}
+
+#doctorDashboard tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+#doctorDashboard tbody tr:nth-child(even) {
+  background-color: rgba(249, 249, 249, 0.6);
+}
+
+#doctorDashboard tbody tr:hover {
+  background-color: rgba(1, 92, 93, 0.12);
+}
+
+/* Optional header above table */
+#doctorDashboard .table-header {
+  font-size: 24px;
+  color: var(--primary);
+  margin: 0 0 30px 0;
+  font-weight: 700;
+}
+
+/* =========================
+   Extras
+   ========================= */
+/* Prescription button */
+#doctorDashboard .prescription-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.08s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-1);
+}
+
+#doctorDashboard .prescription-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.08);
+}
+
+#doctorDashboard .prescription-btn:active {
+  transform: scale(0.95);
+}
+
+/* No record message */
+#doctorDashboard .noPatientRecord {
+  text-align: center;
+  font-style: italic;
+  color: #8ca2b3;
+  font-size: 16px;
+  padding: 16px;
+}
+
+/* =========================
+   Responsive Design
+   ========================= */
+@media (max-width: 900px) {
+  #doctorDashboard td,
+  #doctorDashboard th {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  #doctorDashboard.main-content {
+    padding: 20px 14px;
+    gap: 14px;
+  }
+
+  #doctorDashboard .controls {
+    gap: 10px;
+  }
+
+  #doctorDashboard .filters {
+    width: 100%;
+  }
+
+  #doctorDashboard .filter {
+    min-width: 140px;
+  }
+
+  #doctorDashboard table {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  #doctorDashboard .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #doctorDashboard .search {
+    min-width: 100%;
+  }
+
+  #doctorDashboard #todayButton,
+  #doctorDashboard .today-btn,
+  #doctorDashboard .btn {
+    width: 100%;
+  }
+
+  #doctorDashboard table {
+    font-size: 13px;
+  }
+
+  #doctorDashboard td,
+  #doctorDashboard th {
+    white-space: nowrap;
+    padding: 10px;
+  }
+}
+
+/* This is the style sheet for the doctorDashboard.html */
 /* 
 **Table Header (`.table-header`)**
 

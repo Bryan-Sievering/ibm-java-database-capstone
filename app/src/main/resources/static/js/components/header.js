@@ -1,3 +1,215 @@
+// header.js
+
+(function () {
+  function isHomePage() {
+    const p = window.location.pathname || "/";
+    return p === "/" || p.endsWith("/index.html");
+  }
+
+  function getRole() {
+    // Primary key per spec: userRole
+    let role = localStorage.getItem("userRole");
+
+    // Optional fallback if some pages set 'role'
+    if (!role) {
+      const legacy = localStorage.getItem("role");
+      if (legacy) {
+        role = legacy;
+        localStorage.setItem("userRole", legacy);
+      }
+    }
+    return role;
+  }
+
+  function getToken() {
+    return localStorage.getItem("token");
+  }
+
+  function renderHeader() {
+    const headerDiv = document.getElementById("header");
+    if (!headerDiv) return;
+
+    // Do not display role-based header on the homepage
+    if (isHomePage()) {
+      try {
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("token");
+      } catch (_) {}
+      headerDiv.innerHTML = `
+        <header class="header">
+          <div class="logo-section">
+            <img src="/assets/images/logo/logo.png" alt="Smart Clinic Logo" class="logo-img" />
+            <span class="logo-title">Smart Clinic</span>
+          </div>
+        </header>`;
+      return;
+    }
+
+    const role = getRole();
+    const token = getToken();
+
+    // Guard: if privileged roles are missing a token, treat as expired/invalid session
+    if ((role === "loggedPatient" || role === "admin" || role === "doctor") && !token) {
+      try {
+        localStorage.removeItem("userRole");
+      } catch (_) {}
+      alert("Session expired or invalid login. Please log in again.");
+      window.location.href = "/";
+      return;
+    }
+
+    let headerContent = `
+      <header class="header">
+        <div class="logo-section" style="cursor:pointer" id="logoHome">
+          <img src="/assets/images/logo/logo.png" alt="Smart Clinic Logo" class="logo-img" />
+          <span class="logo-title">Smart Clinic</span>
+        </div>
+        <nav class="nav-actions">`;
+
+    // Role-specific actions
+    if (role === "admin") {
+      headerContent += `
+        <button id="addDocBtn" class="adminBtn">Add Doctor</button>
+        <a id="logoutBtn" href="#" class="nav-link">Logout</a>`;
+    } else if (role === "doctor") {
+      headerContent += `
+        <button id="doctorHome" class="adminBtn">Home</button>
+        <a id="logoutBtn" href="#" class="nav-link">Logout</a>`;
+    } else if (role === "patient" || !role) {
+      headerContent += `
+        <button id="patientLogin" class="adminBtn">Login</button>
+        <button id="patientSignup" class="adminBtn">Sign Up</button>`;
+    } else if (role === "loggedPatient") {
+      headerContent += `
+        <button id="loggedPatientHome" class="adminBtn">Home</button>
+        <button id="patientAppointments" class="adminBtn">Appointments</button>
+        <a id="logoutPatientBtn" href="#" class="nav-link">Logout</a>`;
+    }
+
+    headerContent += `</nav></header>`;
+
+    headerDiv.innerHTML = headerContent;
+    attachHeaderButtonListeners();
+  }
+
+  function attachHeaderButtonListeners() {
+    const byId = (id) => document.getElementById(id);
+
+    const logoHome = byId("logoHome");
+    if (logoHome) {
+      logoHome.addEventListener("click", () => {
+        const role = localStorage.getItem("userRole");
+        // Simple smart home routing based on role
+        if (role === "admin") window.location.href = "/pages/adminDashboard.html";
+        else if (role === "doctor") window.location.href = "/pages/doctorDashboard.html";
+        else if (role === "loggedPatient") window.location.href = "/pages/loggedPatientDashboard.html";
+        else window.location.href = "/";
+      });
+    }
+
+    const addDocBtn = byId("addDocBtn");
+    if (addDocBtn) {
+      addDocBtn.addEventListener("click", () => {
+        if (typeof window.openModal === "function") {
+          window.openModal("addDoctor");
+        } else {
+          console.warn("openModal('addDoctor') not available.");
+        }
+      });
+    }
+
+    const doctorHome = byId("doctorHome");
+    if (doctorHome) {
+      doctorHome.addEventListener("click", () => {
+        window.location.href = "/pages/doctorDashboard.html";
+      });
+    }
+
+    const patientLogin = byId("patientLogin");
+    if (patientLogin) {
+      patientLogin.addEventListener("click", () => {
+        localStorage.setItem("userRole", "patient");
+        if (typeof window.openModal === "function") {
+          window.openModal("patientLogin");
+        } else {
+          console.warn("openModal('patientLogin') not available.");
+        }
+      });
+    }
+
+    const patientSignup = byId("patientSignup");
+    if (patientSignup) {
+      patientSignup.addEventListener("click", () => {
+        localStorage.setItem("userRole", "patient");
+        if (typeof window.openModal === "function") {
+          window.openModal("patientSignup");
+        } else {
+          console.warn("openModal('patientSignup') not available.");
+        }
+      });
+    }
+
+    const loggedPatientHome = byId("loggedPatientHome");
+    if (loggedPatientHome) {
+      loggedPatientHome.addEventListener("click", () => {
+        window.location.href = "/pages/loggedPatientDashboard.html";
+      });
+    }
+
+    const patientAppointments = byId("patientAppointments");
+    if (patientAppointments) {
+      patientAppointments.addEventListener("click", () => {
+        window.location.href = "/pages/patientAppointments.html";
+      });
+    }
+
+    const logoutBtn = byId("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        logout();
+      });
+    }
+
+    const logoutPatientBtn = byId("logoutPatientBtn");
+    if (logoutPatientBtn) {
+      logoutPatientBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        logoutPatient();
+      });
+    }
+  }
+
+  // Logout helpers
+  function logout() {
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+    } catch (_) {}
+    window.location.href = "/";
+  }
+
+  function logoutPatient() {
+    try {
+      localStorage.removeItem("token");
+      localStorage.setItem("userRole", "patient");
+    } catch (_) {}
+    window.location.href = "/pages/patientDashboard.html";
+  }
+
+  // Expose functions if needed globally
+  window.renderHeader = renderHeader;
+  window.logout = logout;
+  window.logoutPatient = logoutPatient;
+
+  // Initialize after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderHeader);
+  } else {
+    renderHeader();
+  }
+})();
+
 /*
   Step-by-Step Explanation of Header Section Rendering
 

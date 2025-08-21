@@ -1,3 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>DoctorDashboard</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/images/logo/logo.png}" />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" th:href="@{/assets/css/adminDashboard.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/doctorDashboard.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
+
+    <!-- Utilities and components -->
+    <script th:src="@{/js/render.js}" defer></script>
+    <script th:src="@{/js/util.js}" defer></script>
+    <script th:src="@{/js/components/header.js}" defer></script>
+    <script th:src="@{/js/components/footer.js}" defer></script>
+    <script th:src="@{/js/components/patientRows.js}" defer></script>
+</head>
+<body>
+<div class="container">
+    <div class="wrapper">
+        <!-- Header placeholder -->
+        <div id="header"></div>
+
+        <main class="main-content" id="doctorDashboard" data-require-role="doctor">
+            <section class="controls">
+                <div class="search">
+                    <label for="searchBar" class="visually-hidden">Search patients</label>
+                    <input type="text" id="searchBar" placeholder="Search by patient name, phone, or ID" />
+                </div>
+
+                <div class="filters">
+                    <button id="todayButton" class="btn">Today’s Appointments</button>
+
+                    <div class="filter">
+                        <label for="datePicker">Select date</label>
+                        <input type="date" id="datePicker" />
+                    </div>
+
+                    <div class="filter">
+                        <label for="statusFilter">Appointment status</label>
+                        <select id="statusFilter">
+                            <option value="all">All</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="table-wrapper" style="width: 100%; overflow-x: auto;">
+                    <table id="patientTable" class="table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Prescription</th>
+                        </tr>
+                        </thead>
+                        <tbody id="patientTableBody">
+                        <!-- Rows injected dynamically by patientRows.js / doctorDashboard.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer placeholder -->
+        <div id="footer"></div>
+    </div>
+</div>
+
+<!-- Services and page logic -->
+<script type="module" th:src="@{/js/services/patientServices.js}" defer></script>
+<script type="module" th:src="@{/js/services/doctorDashboard.js}" defer></script>
+</body>
+</html>
+
 <!-- doctorDashboard.html -->
 
 <!-- 
