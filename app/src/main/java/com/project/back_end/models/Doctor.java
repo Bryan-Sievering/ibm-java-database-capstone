@@ -1,14 +1,7 @@
 package com.project.back_end.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -45,10 +38,21 @@ public class Doctor {
     @Column(nullable = false)
     private String password;
 
+    // java
     @NotNull(message = "phone cannot be null")
-    @Pattern(regexp = "\\d{10}", message = "Phone number must be 10 digits")
-    @Column(nullable = false, length = 10)
+    @Pattern(regexp = "^(\\d{10}|\\d{3}-\\d{3}-\\d{4})$", message = "Enter 10 digits or XXX-XXX-XXXX")
+    @Column(nullable = false, length = 12)
     private String phone;
+
+    @PrePersist
+    @PreUpdate
+    private void normalizePhone() {
+        if (phone == null) return;
+        String digits = phone.replaceAll("\\D", "");
+        if (digits.length() == 10) {
+            phone = String.format("%s-%s-%s", digits.substring(0, 3), digits.substring(3, 6), digits.substring(6));
+        }
+    }
 
     @ElementCollection
     @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
