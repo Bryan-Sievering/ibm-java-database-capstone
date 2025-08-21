@@ -1,6 +1,33 @@
 package com.project.back_end.DTO;
 
 public class Login {
+
+    // The user identifier: email (Doctor/Patient) or username (Admin)
+    private String identifier;
+
+    // The user's password
+    private String password;
+
+    public Login() {
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+
     
 // 1. 'email' field:
 //    - Type: private String
@@ -26,5 +53,3 @@ public class Login {
 //    - The 'getPassword()' method allows access to the password value.
 //    - The 'setPassword(String password)' method sets the password value.
 
-
-}

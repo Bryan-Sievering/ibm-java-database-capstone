@@ -1,6 +1,181 @@
+// java
 package com.project.back_end.services;
 
+import com.project.back_end.models.Appointment;
+import com.project.back_end.models.Doctor;
+import com.project.back_end.repo.AppointmentRepository;
+import com.project.back_end.repo.DoctorRepository;
+import com.project.back_end.repo.PatientRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
+
+@org.springframework.stereotype.Service
 public class AppointmentService {
+
+    private final AppointmentRepository appointmentRepository;
+    private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
+    private final TokenService tokenService;
+    private final Service generalService;
+
+    public AppointmentService(AppointmentRepository appointmentRepository,
+                              PatientRepository patientRepository,
+                              DoctorRepository doctorRepository,
+                              TokenService tokenService,
+                              Service generalService) {
+        this.appointmentRepository = appointmentRepository;
+        this.patientRepository = patientRepository;
+        this.doctorRepository = doctorRepository;
+        this.tokenService = tokenService;
+        this.generalService = generalService;
+    }
+
+    @Transactional
+    public int bookAppointment(Appointment appointment) {
+        try {
+            appointmentRepository.save(appointment);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<Map<String, String>> updateAppointment(Appointment appointment) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            if (appointment.getId() == null) {
+                response.put("message", "Appointment ID is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            Optional<Appointment> existingOpt = appointmentRepository.findById(appointment.getId());
+            if (existingOpt.isEmpty()) {
+                response.put("message", "Appointment not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            Appointment existing = existingOpt.get();
+
+            if (appointment.getPatient() == null || existing.getPatient() == null ||
+                    !Objects.equals(existing.getPatient().getId(), appointment.getPatient().getId())) {
+                response.put("message", "Patient mismatch for this appointment");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+
+            int validation = generalService.validateAppointment(appointment);
+            if (validation == -1) {
+                response.put("message", "Invalid doctor");
+                return ResponseEntity.badRequest().body(response);
+            }
+            if (validation == 0) {
+                response.put("message", "Requested time is not available");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
+            appointment.setId(existing.getId());
+            appointmentRepository.save(appointment);
+
+            response.put("message", "Appointment updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Failed to update appointment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<Map<String, String>> cancelAppointment(long id, String token) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            Optional<Appointment> existingOpt = appointmentRepository.findById(id);
+            if (existingOpt.isEmpty()) {
+                response.put("message", "Appointment not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            Appointment existing = existingOpt.get();
+            String emailFromToken = tokenService.getEmailFromToken(token);
+
+            if (existing.getPatient() == null || existing.getPatient().getEmail() == null ||
+                    !existing.getPatient().getEmail().equalsIgnoreCase(emailFromToken)) {
+                response.put("message", "You are not authorized to cancel this appointment");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+
+            appointmentRepository.delete(existing);
+            response.put("message", "Appointment cancelled successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Failed to cancel appointment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    public Map<String, Object> getAppointment(String pname, LocalDate date, String token) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String email = tokenService.getEmailFromToken(token);
+            Doctor doctor = doctorRepository.findByEmail(email);
+            if (doctor == null) {
+                result.put("appointments", Collections.emptyList());
+                result.put("message", "Doctor not found for provided token");
+                return result;
+            }
+
+            LocalDateTime start = date.atTime(LocalTime.MIN);
+            LocalDateTime end = date.atTime(LocalTime.MAX);
+
+            List<Appointment> appointments;
+            if (pname != null && !pname.isBlank()) {
+                appointments = appointmentRepository
+                        .findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(
+                                doctor.getId(), pname.trim(), start, end);
+            } else {
+                appointments = appointmentRepository
+                        .findByDoctorIdAndAppointmentTimeBetween(doctor.getId(), start, end);
+            }
+
+            result.put("appointments", appointments);
+            result.put("count", appointments.size());
+            return result;
+        } catch (Exception e) {
+            result.put("appointments", Collections.emptyList());
+            result.put("message", "Failed to retrieve appointments");
+            return result;
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<Map<String, String>> changeStatus(long id, int status) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            Optional<Appointment> existingOpt = appointmentRepository.findById(id);
+            if (existingOpt.isEmpty()) {
+                response.put("message", "Appointment not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            Appointment appointment = existingOpt.get();
+            appointment.setStatus(status);
+            appointmentRepository.save(appointment);
+
+            response.put("message", "Appointment status updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Failed to change appointment status");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+}
 // 1. **Add @Service Annotation**:
 //    - To indicate that this class is a service layer class for handling business logic.
 //    - The `@Service` annotation should be added before the class declaration to mark it as a Spring service component.
@@ -40,6 +215,3 @@ public class AppointmentService {
 //    - This method updates the status of an appointment by changing its value in the database.
 //    - It should be annotated with `@Transactional` to ensure the operation is executed in a single transaction.
 //    - Instruction: Add `@Transactional` before this method to ensure atomicity when updating appointment status.
-
-
-}

@@ -1,13 +1,14 @@
+// java
 package com.project.back_end.mvc;
 
+import com.project.back_end.services.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Map;
-
-import com.project.back_end.services.Service;
 
 @Controller
 public class DashboardController {
@@ -22,27 +23,23 @@ public class DashboardController {
     // GET /adminDashboard/{token}
     @GetMapping("/adminDashboard/{token}")
     public String adminDashboard(@PathVariable String token) {
-        // Validate token for admin role
-        Map<String, String> validation = service.validateToken(token, "admin");
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "admin");
 
-        // If map is empty => token valid; else => invalid
-        if (validation == null || validation.isEmpty()) {
-            return "admin/adminDashboard";
+        if (validation == null || !validation.getStatusCode().is2xxSuccessful()) {
+            return "redirect:/";
         }
-        return "redirect:/";
+        return "admin/adminDashboard";
     }
 
     // GET /doctorDashboard/{token}
     @GetMapping("/doctorDashboard/{token}")
     public String doctorDashboard(@PathVariable String token) {
-        // Validate token for doctor role
-        Map<String, String> validation = service.validateToken(token, "doctor");
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "doctor");
 
-        // If map is empty => token valid; else => invalid
-        if (validation == null || validation.isEmpty()) {
-            return "doctor/doctorDashboard";
+        if (validation == null || !validation.getStatusCode().is2xxSuccessful()) {
+            return "redirect:/";
         }
-        return "redirect:/";
+        return "doctor/doctorDashboard";
     }
 }
 

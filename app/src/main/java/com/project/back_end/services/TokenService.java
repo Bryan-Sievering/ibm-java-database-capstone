@@ -1,6 +1,107 @@
+// java
 package com.project.back_end.services;
 
+import com.project.back_end.repo.AdminRepository;
+import com.project.back_end.repo.DoctorRepository;
+import com.project.back_end.repo.PatientRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Component
 public class TokenService {
+
+    private final AdminRepository adminRepository;
+    private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    public TokenService(AdminRepository adminRepository,
+                        DoctorRepository doctorRepository,
+                        PatientRepository patientRepository) {
+        this.adminRepository = adminRepository;
+        this.doctorRepository = doctorRepository;
+        this.patientRepository = patientRepository;
+    }
+
+    // Generate JWT for a given identifier (e.g., username/email)
+    public String generateToken(String identifier) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + 7L * 24 * 60 * 60 * 1000); // 7 days
+
+        return Jwts.builder()
+                .subject(identifier)
+                .issuedAt(now)
+                .expiration(expiry)
+                // 0.12.x recommended API: choose algorithm explicitly
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .compact();
+    }
+
+    // Extract identifier (subject) from token using 0.12.x parser API
+    public String extractIdentifier(String token) {
+        String raw = stripBearer(token);
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(raw)
+                .getPayload();
+        return claims.getSubject();
+    }
+
+    // Optional alias
+    public String getEmailFromToken(String token) {
+        return extractIdentifier(token);
+    }
+
+    // Validate token and ensure the subject exists for the given user type
+    public boolean validateToken(String token, String userType) {
+        try {
+            String identifier = extractIdentifier(token);
+            if (identifier == null || identifier.isEmpty() || userType == null) {
+                return false;
+            }
+
+            switch (userType.toLowerCase()) {
+                case "admin":
+                    return adminRepository.findByUsername(identifier) != null;
+                case "doctor":
+                    return doctorRepository.findByEmail(identifier) != null;
+                case "patient":
+                    return patientRepository.findByEmail(identifier) != null;
+                default:
+                    return false;
+            }
+        } catch (JwtException | IllegalArgumentException e) {
+            // Signature invalid, token expired, malformed, etc.
+            return false;
+        }
+    }
+
+    private SecretKey getSigningKey() {
+        // Ensure this secret is at least 32 bytes for HS256
+        byte[] bytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(bytes);
+    }
+
+    private String stripBearer(String token) {
+        if (token == null) return null;
+        String trimmed = token.trim();
+        if (trimmed.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return trimmed.substring(7).trim();
+        }
+        return trimmed;
+    }
+}
 // 1. **@Component Annotation**
 // The @Component annotation marks this class as a Spring component, meaning Spring will manage it as a bean within its application context.
 // This allows the class to be injected into other Spring-managed components (like services or controllers) where it's needed.
@@ -39,5 +140,3 @@ public class TokenService {
 // - The method gracefully handles any errors by returning false if the token is invalid or an exception occurs.
 // This ensures secure access control based on the user's role and their existence in the system.
 
-
-}

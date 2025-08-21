@@ -1,7 +1,131 @@
+// java
 package com.project.back_end.controllers;
 
+import com.project.back_end.models.Appointment; // Adjust if your Appointment class is in a different package
+import com.project.back_end.services.AppointmentService; // Adjust package if needed
+import com.project.back_end.services.Service; // Adjust package if needed
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/appointments")
 public class AppointmentController {
+
+    private final AppointmentService appointmentService;
+    private final Service service;
+
+    public AppointmentController(AppointmentService appointmentService, Service service) {
+        this.appointmentService = appointmentService;
+        this.service = service;
+    }
+
+    // GET /appointments/{date}/{patientName}/{token}
+    @GetMapping("/{date}/{patientName}/{token}")
+    public ResponseEntity<Map<String, Object>> getAppointments(
+            @PathVariable String date,
+            @PathVariable String patientName,
+            @PathVariable String token) {
+
+        // Validate token for doctor
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "doctor");
+        if (!validation.getStatusCode().is2xxSuccessful()) {
+            // Forward validation failure as-is
+            return ResponseEntity.status(validation.getStatusCode())
+                    .body(new HashMap<>(validation.getBody() != null ? Map.copyOf(validation.getBody()) : Map.of()));
+        }
+
+        // Parse date
+        final LocalDate localDate;
+        try {
+            localDate = LocalDate.parse(date); // expects ISO-8601: yyyy-MM-dd
+        } catch (DateTimeParseException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "Invalid date format. Expected yyyy-MM-dd.");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        // Normalize patient name (treat "all" or "-" as no filter)
+        String pname = patientName;
+        if ("all".equalsIgnoreCase(patientName) || "-".equals(patientName)) {
+            pname = null;
+        }
+
+        Map<String, Object> result = appointmentService.getAppointment(pname, localDate, token);
+        return ResponseEntity.ok(result);
+    }
+
+    // POST /appointments/{token}
+    @PostMapping("/{token}")
+    public ResponseEntity<Map<String, String>> bookAppointment(
+            @PathVariable String token,
+            @RequestBody Appointment appointment) {
+
+        // Validate token for patient
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "patient");
+        if (!validation.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(validation.getStatusCode()).body(validation.getBody());
+        }
+
+        // Validate appointment details (doctor exists, time availability, etc.)
+        int validationResult = service.validateAppointment(appointment);
+        Map<String, String> response = new HashMap<>();
+        if (validationResult == -1) {
+            response.put("message", "Invalid doctor");
+            return ResponseEntity.badRequest().body(response);
+        }
+        if (validationResult == 0) {
+            response.put("message", "Requested time is not available");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+
+        int booked = appointmentService.bookAppointment(appointment);
+        if (booked == 1) {
+            response.put("message", "Appointment booked successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            response.put("message", "Failed to book appointment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // PUT /appointments/{token}
+    @PutMapping("/{token}")
+    public ResponseEntity<Map<String, String>> updateAppointment(
+            @PathVariable String token,
+            @RequestBody Appointment appointment) {
+
+        // Validate token for patient
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "patient");
+        if (!validation.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(validation.getStatusCode()).body(validation.getBody());
+        }
+
+        // Delegate to AppointmentService (handles checks and responses)
+        return appointmentService.updateAppointment(appointment);
+    }
+
+    // DELETE /appointments/{id}/{token}
+    @DeleteMapping("/{id}/{token}")
+    public ResponseEntity<Map<String, String>> cancelAppointment(
+            @PathVariable long id,
+            @PathVariable String token) {
+
+        // Validate token for patient
+        ResponseEntity<Map<String, String>> validation = service.validateToken(token, "patient");
+        if (!validation.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(validation.getStatusCode()).body(validation.getBody());
+        }
+
+        // Delegate to AppointmentService (verifies ownership via token)
+        return appointmentService.cancelAppointment(id, token);
+    }
+}
 
 // 1. Set Up the Controller Class:
 //    - Annotate the class with `@RestController` to define it as a REST API controller.
@@ -44,5 +168,3 @@ public class AppointmentController {
 //    - Validates the token for `"patient"` role to ensure the user is authorized to cancel the appointment.
 //    - Calls `AppointmentService` to handle the cancellation process and returns the result.
 
-
-}
