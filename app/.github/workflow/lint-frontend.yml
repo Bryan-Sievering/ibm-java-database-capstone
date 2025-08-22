@@ -1,0 +1,41 @@
+# yaml
+name: Lint Frontend
+
+on: [push, pull_request]
+
+concurrency:
+  group: lint-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-frontend:
+    name: Lint HTML, CSS, and JS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Optional: speed up repeated npx installs
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Lint HTML
+        run: npx -y htmlhint@^1.1.4 "app/src/main/resources/static/assets/pages/**/*.html"
+
+      - name: Lint CSS
+        run: npx -y stylelint@^16.7.0 "app/src/main/resources/static/assets/css/**/*.css" --allow-empty-input
+
+      - name: Lint JS
+        run: npx -y eslint@^9.8.0 "app/src/main/resources/static/assets/js/**/*.js" --no-error-on-unmatched-pattern --max-warnings=0

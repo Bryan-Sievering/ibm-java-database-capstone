@@ -1,0 +1,42 @@
+# yaml
+name: Lint Java Backend
+
+on:
+  push:
+    paths:
+      - 'app/src/main/java/**'
+      - 'pom.xml'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    paths:
+      - 'app/src/main/java/**'
+      - 'pom.xml'
+      - '.github/workflows/backend.yml'
+
+concurrency:
+  group: lint-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-java:
+    name: Checkstyle Java Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download Checkstyle
+        run: |
+          CHECKSTYLE_VERSION=10.17.0
+          curl -sSL -o checkstyle.jar "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-${CHECKSTYLE_VERSION}/checkstyle-${CHECKSTYLE_VERSION}-all.jar"
+
+      - name: Run Checkstyle
+        run: |
+          # Uses the built-in Google style from the jar
+          java -jar checkstyle.jar -c /google_checks.xml "app/src/main/java"
