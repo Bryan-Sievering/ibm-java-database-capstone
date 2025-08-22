@@ -1,18 +1,27 @@
-// loggedPatient.js 
+// javascript
+// loggedPatient.js
 import { getDoctors } from './services/doctorServices.js';
 import { createDoctorCard } from './components/doctorCard.js';
 import { filterDoctors } from './services/doctorServices.js';
 import { bookAppointment } from './services/appointmentRecordService.js';
 
-
 document.addEventListener("DOMContentLoaded", () => {
   loadDoctorCards();
+
+  // Attach filter listeners after DOM is ready
+  const sb = document.getElementById("searchBar");
+  if (sb) sb.addEventListener("input", filterDoctorsOnChange);
+  const ft = document.getElementById("filterTime");
+  if (ft) ft.addEventListener("change", filterDoctorsOnChange);
+  const fs = document.getElementById("filterSpecialty");
+  if (fs) fs.addEventListener("change", filterDoctorsOnChange);
 });
 
 function loadDoctorCards() {
   getDoctors()
     .then(doctors => {
       const contentDiv = document.getElementById("content");
+      if (!contentDiv) return;
       contentDiv.innerHTML = "";
 
       doctors.forEach(doctor => {
@@ -71,7 +80,6 @@ export function showBookingOverlay(e, doctor, patient) {
       status: 0
     };
 
-
     const { success, message } = await bookAppointment(appointment, token);
 
     if (success) {
@@ -84,40 +92,34 @@ export function showBookingOverlay(e, doctor, patient) {
   });
 }
 
-
-
-// Filter Input
-document.getElementById("searchBar").addEventListener("input", filterDoctorsOnChange);
-document.getElementById("filterTime").addEventListener("change", filterDoctorsOnChange);
-document.getElementById("filterSpecialty").addEventListener("change", filterDoctorsOnChange);
-
-
-
 function filterDoctorsOnChange() {
-  const searchBar = document.getElementById("searchBar").value.trim();
-  const filterTime = document.getElementById("filterTime").value;
-  const filterSpecialty = document.getElementById("filterSpecialty").value;
+  const searchBar = document.getElementById("searchBar")?.value?.trim() || "";
+  const filterTime = document.getElementById("filterTime")?.value || "";
+  const filterSpecialty = document.getElementById("filterSpecialty")?.value || "";
 
-
-  const name = searchBar.length > 0 ? searchBar : null;
-  const time = filterTime.length > 0 ? filterTime : null;
-  const specialty = filterSpecialty.length > 0 ? filterSpecialty : null;
+  // Use "all" so the backend route can normalize it
+  const name = searchBar.length > 0 ? searchBar : "all";
+  const time = filterTime.length > 0 ? filterTime : "all";
+  const specialty = filterSpecialty.length > 0 ? filterSpecialty : "all";
 
   filterDoctors(name, time, specialty)
     .then(response => {
-      const doctors = response.doctors;
+      // Normalize to array whether API returns an array or { doctors: [...] }
+      const doctors = Array.isArray(response)
+        ? response
+        : (Array.isArray(response?.doctors) ? response.doctors : []);
+
       const contentDiv = document.getElementById("content");
+      if (!contentDiv) return;
       contentDiv.innerHTML = "";
 
       if (doctors.length > 0) {
-        console.log(doctors);
         doctors.forEach(doctor => {
           const card = createDoctorCard(doctor);
           contentDiv.appendChild(card);
         });
       } else {
         contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
-        console.log("Nothing");
       }
     })
     .catch(error => {
@@ -128,11 +130,11 @@ function filterDoctorsOnChange() {
 
 export function renderDoctorCards(doctors) {
   const contentDiv = document.getElementById("content");
+  if (!contentDiv) return;
   contentDiv.innerHTML = "";
 
   doctors.forEach(doctor => {
     const card = createDoctorCard(doctor);
     contentDiv.appendChild(card);
   });
-
 }

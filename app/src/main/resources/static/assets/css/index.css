@@ -11,16 +11,20 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+/* Make the background cover the full viewport */
+html, body {
   height: 100%;
-  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
-  color: #102a43;
-  background-color: #f7fafb;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Page background image */
+body {
+  background-image: url('/assets/images/defineRole/index.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* optional: nice effect on scroll */
+}
+
 
 /* Containers */
 .container {

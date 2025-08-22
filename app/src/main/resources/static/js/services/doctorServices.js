@@ -1,3 +1,4 @@
+// javascript
 // doctorServices.js
 // Centralized API calls for doctor-related operations.
 
@@ -13,9 +14,8 @@ export async function getDoctors() {
   try {
     const res = await fetch(DOCTOR_API, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
     });
 
     if (!res.ok) {
@@ -38,28 +38,25 @@ export async function getDoctors() {
  * Returns { success: boolean, message: string, data?: any }
  */
 export async function deleteDoctor(id, token) {
-  if (!id) {
-    return { success: false, message: "Invalid doctor id." };
-  }
-  if (!token) {
-    return { success: false, message: "Missing authentication token." };
-  }
+  if (!id) return { success: false, message: "Invalid doctor id." };
+  if (!token) return { success: false, message: "Missing authentication token." };
 
-  // Include token in query (path param alternative) and also send Authorization header for common backends
-  const urlPath = `${DOCTOR_API}/${encodeURIComponent(id)}`;
-  const url = `${urlPath}?token=${encodeURIComponent(token)}`;
+  // Path-based token: DELETE /doctor/{id}/{token}
+  const url = `${DOCTOR_API}/${encodeURIComponent(id)}/${encodeURIComponent(token)}`;
 
   try {
     const res = await fetch(url, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
+        // Authorization header included for compatibility; backend may ignore it
         Authorization: `Bearer ${token}`,
       },
+      credentials: "same-origin",
     });
 
     const data = await res.json().catch(() => ({}));
-    const success = res.ok && data?.success !== false;
+    const success = res.ok;
     const message = data?.message || (success ? "Doctor deleted successfully." : "Failed to delete doctor.");
 
     return { success, message, data };
@@ -81,8 +78,8 @@ export async function saveDoctor(doctor, token) {
     return { success: false, message: "Missing authentication token." };
   }
 
-  // Include token as query (path param alternative) and also send Authorization header
-  const url = `${DOCTOR_API}?token=${encodeURIComponent(token)}`;
+  // Path-based token: POST /doctor/{token}
+  const url = `${DOCTOR_API}/${encodeURIComponent(token)}`;
 
   try {
     const res = await fetch(url, {
@@ -92,11 +89,12 @@ export async function saveDoctor(doctor, token) {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
       },
+      credentials: "same-origin",
       body: JSON.stringify(doctor),
     });
 
     const data = await res.json().catch(() => ({}));
-    const success = res.ok && data?.success !== false;
+    const success = res.ok; // usually 201 Created
     const message = data?.message || (success ? "Doctor saved successfully." : "Failed to save doctor.");
 
     return { success, message, data };
@@ -108,7 +106,7 @@ export async function saveDoctor(doctor, token) {
 
 /**
  * Filter doctors using name, time, and specialty.
- * Returns an array of matching doctors. On failure, alerts and returns [].
+ * Returns an array of matching doctors. On failure, returns [].
  */
 export async function filterDoctors(name, time, specialty) {
   // Use 'all' placeholder for empty params to align with path-based filtering
@@ -121,15 +119,12 @@ export async function filterDoctors(name, time, specialty) {
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
     });
 
     if (!res.ok) {
       console.warn("filterDoctors: non-OK response", res.status);
-      // Per requirements, notify the user on failures
-      if (typeof alert === "function") alert("Failed to filter doctors. Please try again.");
       return [];
     }
 
@@ -138,7 +133,6 @@ export async function filterDoctors(name, time, specialty) {
     return Array.isArray(list) ? list : [];
   } catch (err) {
     console.error("filterDoctors error:", err);
-    if (typeof alert === "function") alert("An error occurred while filtering doctors.");
     return [];
   }
 }

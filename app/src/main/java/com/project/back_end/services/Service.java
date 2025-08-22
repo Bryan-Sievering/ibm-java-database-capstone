@@ -12,6 +12,7 @@ import com.project.back_end.repo.PatientRepository;
 import com.project.back_end.services.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -91,6 +92,7 @@ public class Service {
     // 3) Filter doctors by name, specialty and time
     // java
 // 3) Filter doctors by name, specialty and time
+    @Transactional(readOnly = true)
     public Map<String, Object> filterDoctor(String name, String specialty, String time) {
         Map<String, Object> result = new HashMap<>();
         try {
@@ -101,7 +103,6 @@ public class Service {
             List<Doctor> doctors;
 
             if (t != null) {
-                // Use existing filtering by time (and specialty if provided)
                 Map<String, Object> map = doctorService.filterDoctorByTimeAndSpecility(s, t);
                 @SuppressWarnings("unchecked")
                 List<Doctor> base = (List<Doctor>) map.getOrDefault("doctors", Collections.emptyList());
@@ -113,7 +114,6 @@ public class Service {
                     doctors = base;
                 }
             } else {
-                // No time filter: derive base by specialty or use all, then optionally filter by name
                 List<Doctor> base = (s != null)
                         ? doctorRepository.findBySpecialtyIgnoreCase(s)
                         : doctorRepository.findAll();
@@ -127,6 +127,14 @@ public class Service {
                 }
             }
 
+            // Force-initialize lazy collections to avoid LazyInitializationException
+            doctors.forEach(d -> {
+                try {
+                    List<String> slots = d.getAvailableTimes();
+                    if (slots != null) { slots.size(); }
+                } catch (Exception ignored) {}
+            });
+
             result.put("doctors", doctors);
             result.put("count", doctors != null ? doctors.size() : 0);
             return result;
@@ -137,6 +145,7 @@ public class Service {
             return result;
         }
     }
+
 
     // 4) Validate whether the appointment time is available for the doctor
     // Returns: 1 -> valid, 0 -> time unavailable, -1 -> doctor doesn't exist

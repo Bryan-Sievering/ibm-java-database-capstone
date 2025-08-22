@@ -239,12 +239,16 @@
   }
   
 
-  #content {
+  #content,
+  #doctors,
+  #doctorCards,
+  [data-role="doctor-list"] {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(315px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* adjust 260px as needed */
+    gap: 24px;
     padding: 20px;
   }
+
 
   .doctor-card {
     display: flex;
@@ -380,3 +384,46 @@
   accent-color: #015c5db8; 
 }
 
+#content,
+#doctors,
+#doctorCards,
+[data-role="doctor-list"] {
+  display: grid !important;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* Guarantee columns at common breakpoints */
+@media (min-width: 640px) {
+  #content,
+  #doctors,
+  #doctorCards,
+  [data-role="doctor-list"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 960px) {
+  #content,
+  #doctors,
+  #doctorCards,
+  [data-role="doctor-list"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  #content,
+  #doctors,
+  #doctorCards,
+  [data-role="doctor-list"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* If the grid is inside a narrow wrapper, make that wrapper full-width */
+.filter-wrapper {
+  width: 100%;
+  flex-wrap: wrap;
+}

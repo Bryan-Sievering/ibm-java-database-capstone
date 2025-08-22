@@ -108,15 +108,29 @@
     }
 
     const addDocBtn = byId("addDocBtn");
-    if (addDocBtn) {
-      addDocBtn.addEventListener("click", () => {
-        if (typeof window.openModal === "function") {
-          window.openModal("addDoctor");
-        } else {
-          console.warn("openModal('addDoctor') not available.");
+        if (addDocBtn) {
+          addDocBtn.addEventListener("click", async () => {
+            try {
+              // If openModal isn't on window yet, dynamically import the module
+              if (typeof window.openModal !== "function") {
+                const mod = await import("/js/components/modals.js"); // adjust path to your modals.js
+                const fn = mod?.openModal || window.openModal;
+                if (typeof fn === "function") {
+                  fn("addDoctor");
+                } else {
+                  console.warn("openModal not available after dynamic import.");
+                  alert("Unable to open the Add Doctor dialog right now.");
+                }
+              } else {
+                window.openModal("addDoctor");
+              }
+            } catch (err) {
+              console.error("Failed to open Add Doctor modal:", err);
+              alert("Failed to open the dialog. Please try again.");
+            }
+          });
         }
-      });
-    }
+
 
     const doctorHome = byId("doctorHome");
     if (doctorHome) {

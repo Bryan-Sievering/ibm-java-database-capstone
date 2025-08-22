@@ -1,7 +1,7 @@
 // doctorCard.js
 // Creates a reusable card element for displaying doctor info and role-based actions.
 
-import { showBookingOverlay } from "/js/components/loggedPatient.js";
+import { showBookingOverlay } from "/js/loggedPatient.js";
 import { deleteDoctor } from "/js/services/doctorServices.js";
 import { getPatientData } from "/js/services/patientServices.js";
 

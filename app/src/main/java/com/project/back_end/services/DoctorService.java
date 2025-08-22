@@ -107,11 +107,18 @@ public class DoctorService {
     @Transactional(readOnly = true)
     public List<Doctor> getDoctors() {
         try {
-            return doctorRepository.findAll();
+            List<Doctor> doctors = doctorRepository.findAll();
+            // Force-initialize lazy collections while the transaction is open
+            doctors.forEach(d -> {
+                List<String> slots = d.getAvailableTimes();
+                if (slots != null) { slots.size(); }
+            });
+            return doctors;
         } catch (Exception e) {
             return Collections.emptyList();
         }
     }
+
 
     @Transactional
     public int deleteDoctor(long id) {

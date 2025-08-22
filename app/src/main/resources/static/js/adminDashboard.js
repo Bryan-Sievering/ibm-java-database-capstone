@@ -1,9 +1,9 @@
 // javascript
 // adminDashboard.js - Admin: manage doctors (load, filter, add)
 
-import { openModal } from "../components/modals.js";
-import { getDoctors, filterDoctors, saveDoctor } from "./doctorServices.js";
-import { createDoctorCard } from "../components/doctorCard.js";
+import { openModal } from "/js/components/modals.js";
+import { getDoctors, filterDoctors, saveDoctor } from "/js/services/doctorServices.js";
+import { createDoctorCard } from "/js/components/doctorCard.js";
 
 // Attach button handler for "Add Doctor" (if the header renders it)
 document.addEventListener("click", (e) => {
