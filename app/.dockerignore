@@ -1,0 +1,38 @@
+# Maven build output
+target/
+
+# VCS
+.git/
+.git-*
+
+# IDEs/editors
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS noise
+**/.DS_Store
+Thumbs.db
+
+# Logs and dumps
+logs/
+*.log
+*.hprof
+
+# Node/yarn (if you have a frontend subfolder)
+node_modules/
+dist/
+build/
+
+# Docker/Compose local env files (uncomment if you don't need them during build)
+#.env
+#.env.local
+
+# Keep Maven wrapper files if your Dockerfile uses ./mvnw
+# If your Dockerfile uses the maven image (mvn), you can ignore these:
+#.mvn/
+#mvnw
+#mvnw.cmd
